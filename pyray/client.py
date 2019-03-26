@@ -10,9 +10,8 @@ class HTTPClient(object):
 
     USER_AGENT = "pyray-client"
     API_ENDPOINT = "/api/tm/"
-    DEFAULT_API_VERSION = "2.0"
 
-    def __init__(self, service_url, username, password, api_version=DEFAULT_API_VERSION,
+    def __init__(self, service_url, username, password, api_version="2.0",
                  port=9070, verify_ssl=False, debug=False):
         """
         Initiate a client to query the Riverbed Stingray API.
@@ -67,7 +66,7 @@ class HTTPClient(object):
         :type service_url: str
         :param port: Port used to contact the load balancer API. Default: 9070
         :type port: str
-        :param api_version: API version used to contact the load balancer API. Default: 2.0
+        :param api_version: API version used to contact the load balancer API. Default: "2.0"
         :type api_version: str
         :rtype: str
         """
