@@ -9,9 +9,10 @@ class HTTPClient(object):
     """ Client for communicating to the Riverbed Stingray API """
 
     USER_AGENT = "pyray-client"
-    API_ENDPOINT = "/api/tm/2.0"
+    API_ENDPOINT = "/api/tm/"
+    DEFAULT_API_VERSION = "2.0"
 
-    def __init__(self, service_url, username, password,
+    def __init__(self, service_url, username, password, api_version=DEFAULT_API_VERSION,
                  port=9070, verify_ssl=False, debug=False):
         """
         Initiate a client to query the Riverbed Stingray API.
@@ -24,6 +25,8 @@ class HTTPClient(object):
         :type username: str
         :param password: The password required to login as user
         :type password: str
+        :param api_version: The API Version to use
+        :type api_version: str
         :param port: Port used to contact the load balancer API. Default: 9070
         :type port: str
         :param verify_ssl: Verify SSL. Default: False
@@ -31,11 +34,12 @@ class HTTPClient(object):
         """
         self.username = username
         self.password = password
+        self.api_version = api_version
         self.port = port
         self.debug = debug
         self.timeout = float(30)
         self.verify_ssl = True if verify_ssl else False
-        self.service_url = self.set_service_url(service_url, port)
+        self.service_url = self.set_service_url(service_url, port, api_version)
 
         self.times = []  # [("item", starttime, endtime), ...]
 
@@ -55,7 +59,7 @@ class HTTPClient(object):
         self.http.verify = self.verify_ssl
         self.logged_in = self._authenticate()
 
-    def set_service_url(self, service_url, port):
+    def set_service_url(self, service_url, port, api_version):
         """
         Generate the full API url with the proper scheme and port
 
@@ -63,13 +67,16 @@ class HTTPClient(object):
         :type service_url: str
         :param port: Port used to contact the load balancer API. Default: 9070
         :type port: str
+        :param api_version: API version used to contact the load balancer API. Default: 2.0
+        :type api_version: str
         :rtype: str
         """
         if not service_url.startswith('https://'):
             service_url = 'https://{}'.format(service_url)
-        return '{service_url}:{port}{api_endpoint}'.format(service_url=service_url,
+        return '{service_url}:{port}{api_endpoint}{api_version}'.format(service_url=service_url,
                                                             port=port,
-                                                            api_endpoint=self.API_ENDPOINT)
+                                                            api_endpoint=self.API_ENDPOINT,
+                                                            api_version=api_version)
 
     def _authenticate(self):
         """
