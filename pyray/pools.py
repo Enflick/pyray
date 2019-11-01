@@ -86,14 +86,14 @@ class Pool(Resource):
         """
         Return a list of nodes draining
         """
-        return self.details['properties']['basic']['draining']
+        return [item['node'] for item in self.details['properties']['basic']['nodes_table'] if item.get('state') == "draining"]
 
     @property
     def nodes(self):
         """
         Return a list of nodes in the pool
         """
-        return self.details['properties']['basic']['nodes']
+        return [item['node'] for item in self.details['properties']['basic']['nodes_table']]
 
     def drain_nodes(self, nodes=[]):
         """
@@ -106,7 +106,7 @@ class Pool(Resource):
         url = self.POOLS_BASE + "/{}".format(self.pool_name)
         for node in nodes:
             self._validate_node(node, action='drain')
-            self.details['properties']['basic']['draining'].append(node)
+            [item for item in self.details['properties']['basic']['nodes_table'] if item['node'] == node][0]['state'] = 'draining'
 
         # Send the updated config to the LB
         resp, respbody =  self.manager.time_request(url,
@@ -114,7 +114,7 @@ class Pool(Resource):
                                                     data=self.details)
         # Validate response
         if resp.status_code is not 200:
-            error = respbody['error_info']['basic']['draining']['error_text']
+            error = respbody
             raise exceptions.ValidationError('Drain Error: {}'.format(error))
         else:
             return respbody
@@ -130,7 +130,7 @@ class Pool(Resource):
         url = self.POOLS_BASE + "/{}".format(self.pool_name)
         for node in nodes:
             self._validate_node(node, action='undrain')
-            self.details['properties']['basic']['draining'].remove(node)
+            [item for item in self.details['properties']['basic']['nodes_table'] if item['node'] == node][0]['state'] = 'active'
 
         # Send the updated config to the LB
         return self.manager.time_request(url,

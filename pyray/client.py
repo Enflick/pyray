@@ -9,7 +9,7 @@ class HTTPClient(object):
     """ Client for communicating to the Riverbed Stingray API """
 
     USER_AGENT = "pyray-client"
-    API_ENDPOINT = "/api/tm/2.0"
+    API_ENDPOINT = "/api/tm/5.0"
 
     def __init__(self, service_url, username, password,
                  port=9070, verify_ssl=False, debug=False):
@@ -83,8 +83,9 @@ class HTTPClient(object):
         self.http.auth = (self.username, self.password)
 
         resp, respbody = self.time_request(test_url, method)
+        self._logger.info(respbody)
         if resp.status_code is not 200:
-            raise exceptions.AuthorizationFailure('Invalid Credentials.')
+            raise exceptions.AuthorizationFailure(respbody)
         else:
             return True
 
